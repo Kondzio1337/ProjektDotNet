@@ -1,0 +1,114 @@
+﻿@page "{searchString?}"
+@model Projekt.Pages.Pomocniczy.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+
+
+<h1>Lista wszystkich produktow</h1>
+
+<p>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        // Sprawdź, czy użytkownik ma odpowiedni claim
+        var hasClaim = await AuthorizationService.AuthorizeAsync(User, "kierownik");
+
+        if (hasClaim.Succeeded)
+        {
+            <td>
+                <a asp-page="Create">Dodaj produkt</a>
+            </td>
+        }
+    }
+    
+</p>
+
+<form method="post">
+    <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+    <div class="form-group row">
+        <div class="col-5">
+            <input type="text" asp-for="WartośćSearchString" name="WartośćSearchString" class="form-control" />
+        </div><br />
+        <label for="categoryId">Kategoria:</label>
+        <div class="col-5">
+        <select id="categoryId" asp-for="ID" class="form-control">
+            <option value="">-- Wybierz kategorię --</option>
+            @foreach (var kategoria in Model.Kategorie)
+            {
+                <option value="@kategoria.Value">@kategoria.Text</option>
+            }
+            <br />
+        </select>
+        </div>
+        <div class="col-2">
+            <input type="submit" class="btn btn-primary" value="Wyszukaj" />
+        </div>
+        <div class="col-5">
+        </div>
+    </div>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Produkt[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Produkt[0].Price)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Produkt) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+               
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        // Sprawdź, czy użytkownik ma odpowiedni claim
+                        var hasClaim = await AuthorizationService.AuthorizeAsync(User,"kierownik");
+
+                        if (hasClaim.Succeeded)
+                        {
+                        <td>
+                            <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                        }
+                    }
+                <td>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        // Sprawdź, czy użytkownik ma odpowiedni claim
+                        var hasClaim = await AuthorizationService.AuthorizeAsync(User, "uzytkownik");
+
+                        if (hasClaim.Succeeded)
+                        {
+                        <td>
+                            
+                                <a asp-page="/Koszyk/DodajDoKoszyka" asp-route-id="@item.Id">Dodaj do Koszyka</a>
+                           
+                        </td>
+                        }
+                    }
+                   
+                </td>
+               
+        </tr>
+}
+    </tbody>
+</table>
